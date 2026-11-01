@@ -14,7 +14,7 @@ from homeassistant.helpers.aiohttp_client import (
 )
 from homeassistant.helpers.event import (
     async_track_point_in_time,
-    async_track_time_interval,
+    async_track_utc_time_change,
 )
 from homeassistant.helpers.update_coordinator import (
     DataUpdateCoordinator,
@@ -49,9 +49,9 @@ class JrIdosCoordinator(DataUpdateCoordinator):
         session = async_get_clientsession(hass)
 
         # self.api = JrIdosApi(session)
-        
+
         self.api = IdosScraper(session, entry.data.get(CONF_REGION, "idsjmk"))
-        
+
 
         #
         # Spojové entity registrují samy sebe,
@@ -63,12 +63,13 @@ class JrIdosCoordinator(DataUpdateCoordinator):
         self._unsub_refresh = None
 
         self._unsub_minute = (
-            async_track_time_interval(
+            async_track_utc_time_change(
                 hass,
                 self._minute_tick,
-                timedelta(minutes=1),
+                second=1,
             )
         )
+
 
         super().__init__(
             hass,
@@ -87,23 +88,23 @@ class JrIdosCoordinator(DataUpdateCoordinator):
         # currently displayed departure disappears from results.
         #
         offset_minutes=int(self.entry.options.get(CONF_OFFSET, self.entry.data.get(CONF_OFFSET, 4)))
-        search_dt = datetime.now(dt_util.DEFAULT_TIME_ZONE) + timedelta(minutes=offset_minutes + 1, seconds=MINUTE_ROLLOVER_BUFFER_SECONDS + 1) 
+        search_dt = datetime.now(dt_util.DEFAULT_TIME_ZONE) + timedelta(minutes=offset_minutes + 1, seconds=MINUTE_ROLLOVER_BUFFER_SECONDS + 1)
         count=int(self.entry.options.get(CONF_CONNECTIONS, self.entry.data.get(CONF_CONNECTIONS, 3)))
 
-        try:            
+        try:
             data = await self.api.get_connections(
-              self.entry.data[CONF_SOURCE], 
+              self.entry.data[CONF_SOURCE],
               self.entry.data[CONF_DESTINATION],
               search_dt,
               count,
-            )          
+            )
             self._schedule_next_refresh(data)
             return data
 
-        except (ClientError, TimeoutError, ValueError) as err:            
+        except (ClientError, TimeoutError, ValueError) as err:
             _LOGGER.warning("Unable to load IDOS data: %s", err)
             self._schedule_next_refresh(None)
-            return self.data            
+            return self.data
 
     def _schedule_next_refresh(self, data) -> None:
         """
@@ -120,7 +121,7 @@ class JrIdosCoordinator(DataUpdateCoordinator):
 
         #
         # No connection.
-        # Retry in FALLBACK_REFRESH_MINUTES.        
+        # Retry in FALLBACK_REFRESH_MINUTES.
         #
         now = datetime.now(dt_util.DEFAULT_TIME_ZONE)
 
@@ -145,7 +146,7 @@ class JrIdosCoordinator(DataUpdateCoordinator):
                 refresh_time = datetime.fromtimestamp(first_departure, dt_util.DEFAULT_TIME_ZONE) - timedelta(minutes=offset, seconds=MINUTE_ROLLOVER_BUFFER_SECONDS)
                 #
                 # Safety guard.
-                #                
+                #
 
                 if refresh_time <= now:
                     refresh_time = (now + timedelta(minutes=1))
@@ -165,7 +166,7 @@ class JrIdosCoordinator(DataUpdateCoordinator):
         """Refresh callback."""
 
         _LOGGER.info("[%s] Executing scheduled refresh", self.entry.title)
-         
+
         await self.async_request_refresh()
 
     @callback

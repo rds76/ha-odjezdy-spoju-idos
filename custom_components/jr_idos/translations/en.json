@@ -18,7 +18,7 @@
     "step": {
       "init": {
         "title": "Spoje IDOS",
-        "data": {          
+        "data": {
           "offset": "Offset in minutes"
         }
       }

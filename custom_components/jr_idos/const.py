@@ -37,7 +37,7 @@ REGIONS = {
         "name": "PID",
         "url": "https://pid.idos.cz/spojeni",
     },
-    
+
 }
 
 REGION_OPTIONS = [
@@ -90,7 +90,7 @@ MINUTE_ROLLOVER_BUFFER_SECONDS = 10
 ICON_ROUTE = "mdi:bus-clock"
 ICON_CONNECTION = "mdi:bus"
 #
-# Texty 
+# Texty
 #
 TEXTS = {
     "cs": {

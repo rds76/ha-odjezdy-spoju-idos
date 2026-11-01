@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 from .idos_data import validate_response
 from homeassistant.util import dt as dt_util
 
-from .const import (    
+from .const import (
     DEFAULT_TIMEOUT,
     REGIONS,
 )
@@ -37,7 +37,7 @@ class IdosScraper:
 
         spoje = []
         requests = 0
-        
+
         previous_departure = 0
 
         while len(spoje) < count and requests < self.MAX_REQUESTS:
@@ -58,9 +58,9 @@ class IdosScraper:
                 params=params,
                 timeout=aiohttp.ClientTimeout(total=DEFAULT_TIMEOUT),
             ) as response:
-                
+
                 response.raise_for_status()
-                html = await response.text()                
+                html = await response.text()
                 _LOGGER.debug("URL: %s", response.url)
 
             batch = self._parse_connections(html)
@@ -101,7 +101,7 @@ class IdosScraper:
 
         spoje = spoje[:count]
 
-        data = {            
+        data = {
             "updated": datetime.now(dt_util.DEFAULT_TIME_ZONE),
             "vychozi": source,
             "cilova": destination,
@@ -111,7 +111,7 @@ class IdosScraper:
         validate_response(data)
 
         return data
-    
+
 
     def _parse_connections(self, html: str) -> list:
 

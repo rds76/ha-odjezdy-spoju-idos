@@ -85,11 +85,11 @@ class JrBaseEntity(CoordinatorEntity):
             "manufacturer": MANUFACTURER,
             "model": MODEL,
         }
-    
+
     @property
     def texts(self):
         lang = self.hass.config.language or "en"
-        return TEXTS.get(lang, TEXTS["en"])        
+        return TEXTS.get(lang, TEXTS["en"])
 
 
 class JrRouteSensor(JrBaseEntity, SensorEntity):
@@ -113,7 +113,7 @@ class JrRouteSensor(JrBaseEntity, SensorEntity):
             return None
 
         return self.coordinator.data.get(ATTR_UPDATED)
-        
+
 
     @property
     def available(self):
@@ -124,7 +124,7 @@ class JrRouteSensor(JrBaseEntity, SensorEntity):
         """Expose complete route information."""
 
         data = self.coordinator.data
-        
+
         if not data:
             return {}
 
@@ -141,7 +141,7 @@ class JrConnectionSensor(JrBaseEntity, SensorEntity):
     """Single IDOS connection."""
 
     _attr_icon = ICON_CONNECTION
-    _attr_native_unit_of_measurement = "min"    
+    _attr_native_unit_of_measurement = "min"
     _attr_suggested_display_precision = 0
     _attr_state_class = None
 
@@ -209,7 +209,7 @@ class JrConnectionSensor(JrBaseEntity, SensorEntity):
             return None
 
         minutes = round(departure_ts - time.time()) / 60
-        
+
         return max(minutes,0)
 
     @property
@@ -217,7 +217,7 @@ class JrConnectionSensor(JrBaseEntity, SensorEntity):
         """Connection details."""
 
         spoj = self._connection()
-      
+
         if not spoj:
             return {}
 
@@ -229,7 +229,7 @@ class JrConnectionSensor(JrBaseEntity, SensorEntity):
             ATTR_LINKA: spoj.get(ATTR_LINKA),
             ATTR_LINKA_TEXT: f"{self.texts['line']}: {spoj.get(ATTR_LINKA)}",
             ATTR_ODJEZD: spoj.get(ATTR_ODJEZD),
-            ATTR_ODJEZD_TS: datetime.fromtimestamp(odjezd_ts, DEFAULT_TIME_ZONE).isoformat()  if odjezd_ts else None,          
+            ATTR_ODJEZD_TS: datetime.fromtimestamp(odjezd_ts, DEFAULT_TIME_ZONE).isoformat()  if odjezd_ts else None,
             ATTR_PRIJEZD: spoj.get(ATTR_PRIJEZD),
             ATTR_PRIJEZD_TS: datetime.fromtimestamp(prijezd_ts, DEFAULT_TIME_ZONE).isoformat() if prijezd_ts else None,
             ATTR_SPOJ: spoj.get(ATTR_SPOJ),

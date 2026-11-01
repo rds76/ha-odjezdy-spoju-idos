@@ -34,7 +34,7 @@ CONNECTIONS_SELECTOR = NumberSelector(
         min=2,
         max=10,
         step=1,
-        mode=NumberSelectorMode.SLIDER,        
+        mode=NumberSelectorMode.SLIDER,
     )
 )
 
@@ -44,7 +44,7 @@ OFFSET_SELECTOR = NumberSelector(
         max=60,
         step=1,
         mode=NumberSelectorMode.SLIDER,
-        unit_of_measurement="min",        
+        unit_of_measurement="min",
     )
 )
 
@@ -126,7 +126,7 @@ class JrIdosOptionsFlowHandler(config_entries.OptionsFlow):
         return self.async_show_form(
             step_id="init",
             data_schema=vol.Schema(
-                {                    
+                {
                     vol.Optional(
                         CONF_OFFSET,
                         default=self._config_entry.options.get(

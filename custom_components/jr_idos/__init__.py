@@ -21,7 +21,7 @@ async def async_setup(hass: HomeAssistant, config: dict) -> bool:
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     coordinator = JrIdosCoordinator(hass, entry)
-    
+
     await coordinator.async_config_entry_first_refresh()
 
     hass.data.setdefault(DOMAIN,{})[entry.entry_id] = coordinator
@@ -36,8 +36,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
-    
-    coordinator = hass.data[DOMAIN].pop(entry.entry_id,None)    
+
+    coordinator = hass.data[DOMAIN].pop(entry.entry_id,None)
 
     if coordinator:
         await coordinator.async_shutdown()
