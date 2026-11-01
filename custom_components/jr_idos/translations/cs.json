@@ -1,0 +1,27 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Spoje IDOS",
+        "data": {
+          "name": "Název",
+          "region": "Oblast",
+          "source": "Výchozí zastávka",
+          "destination": "Cílová zastávka",
+          "connections": "Maximální počet spojů",
+          "offset": "Posun v minutách"
+        }
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Spoje IDOS",
+        "data": {          
+          "offset": "Posun v minutách"
+        }
+      }
+    }
+  }
+}

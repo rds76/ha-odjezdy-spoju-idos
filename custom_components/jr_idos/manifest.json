@@ -1,0 +1,12 @@
+{
+  "domain": "jr_idos",
+  "name": "Odjezdy spojů IDOS",
+  "version": "1.0.0",
+  "config_flow": true,
+  "integration_type": "service",
+  "iot_class": "local_polling",
+  "requirements": [
+    "beautifulsoup4>=4.12.0"
+  ],
+  "codeowners": ["@rds76"]
+}

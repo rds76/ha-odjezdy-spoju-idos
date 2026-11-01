@@ -1,0 +1,27 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Spoje IDOS",
+        "data": {
+          "name": "Name",
+          "region": "Region",
+          "source": "Source stop",
+          "destination": "Destination stop",
+          "connections": "Number of connections",
+          "offset": "Offset in minutes"
+        }
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Spoje IDOS",
+        "data": {          
+          "offset": "Offset in minutes"
+        }
+      }
+    }
+  }
+}
