@@ -63,9 +63,19 @@ Při vytváření nové trasy lze nastavit:
 | Počet spojů | Počet zobrazovaných následujících spojů |
 | Offset | Jak dlouho před odjezdem má být spoj považován za aktuální |
 
+### Zadávání zastávek
+
+Názvy zastávek je nutné zadávat přesně tak, jak je používá IDOS.
+
+Nejjednodušší je vyhledat požadované spojení přímo na webu IDOS a zkopírovat názvy zastávek z formuláře.
+
+Pokud název zastávky neodpovídá názvu používanému IDOSem, nemusí být nalezeno žádné spojení.
+
+> **Tip:** Ověřte si nejprve vyhledání spojení přímo v IDOSu. Pokud spojení funguje v IDOSu, bude fungovat i v integraci.
+
 ### Důležité
 
-Integrace používá přímé vyhledání spojení mezi výchozí a cílovou zastávkou.
+Integrace používá vyhledání **přímého** spojení mezi výchozí a cílovou zastávkou.
 
 Nejlépe se hodí pro pravidelně používané trasy, například:
 
