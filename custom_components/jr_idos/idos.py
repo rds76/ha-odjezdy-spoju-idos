@@ -5,12 +5,24 @@ from datetime import datetime, timedelta
 import aiohttp
 from bs4 import BeautifulSoup
 
-from .idos_data import validate_response
+from .connection_data import validate_response
 from homeassistant.util import dt as dt_util
 
 from .const import (
     DEFAULT_TIMEOUT,
     REGIONS,
+    VEHICLE_TYPES,
+    ATTR_CILOVA,
+    ATTR_VYCHOZI,
+    ATTR_LINKA,
+    ATTR_PROSTREDEK,
+    ATTR_ODJEZD,
+    ATTR_ODJEZD_TS,
+    ATTR_PRIJEZD,
+    ATTR_PRIJEZD_TS,
+    ATTR_SPOJ,
+    ATTR_SPOJE,
+    ATTR_UPDATED,
 )
 
 import logging
@@ -21,9 +33,12 @@ class IdosScraper:
 
     MAX_REQUESTS = 5
 
-    def __init__(self, session, region):
+    def __init__(self, session, region_id):
         self.session = session
-        self.base_url = REGIONS[region]["url"]
+        region = REGIONS[region_id]
+        self.base_url = region["url"]
+        self.parser = region.get("parser", 1)
+        self.prostredek = region.get("prostredek", "")
 
     async def get_connections(
         self,
@@ -33,7 +48,7 @@ class IdosScraper:
         count: int,
     ) -> dict:
 
-        _LOGGER.info("Loading and scraping connections from IDOS: '%s -> %s' starting from: %s", source, destination, search_dt)
+        _LOGGER.info("Loading and scraping %d connection(s) from IDOS: '%s -> %s' since: %s", count, source, destination, search_dt.strftime("%Y-%m-%d %H:%M:%S"))
 
         spoje = []
         requests = 0
@@ -72,16 +87,16 @@ class IdosScraper:
             #
             # odstranění duplicit při navazujících dotazech
             #
-            existing = {spoj["odjezd_ts"] for spoj in spoje}
+            existing = {spoj[ATTR_ODJEZD_TS] for spoj in spoje}
 
             for spoj in batch:
-                if spoj["odjezd_ts"] not in existing:
+                if spoj[ATTR_ODJEZD_TS] not in existing:
                     spoje.append(spoj)
 
             if len(spoje) >= count:
                 break
 
-            last_departure = batch[-1]["odjezd_ts"]
+            last_departure = batch[-1][ATTR_ODJEZD_TS]
 
             if last_departure <= previous_departure:
                 _LOGGER.warning("Departure timestamp did not advance, stopping pagination")
@@ -102,18 +117,28 @@ class IdosScraper:
         spoje = spoje[:count]
 
         data = {
-            "updated": datetime.now(dt_util.DEFAULT_TIME_ZONE),
-            "vychozi": source,
-            "cilova": destination,
-            "spoje": spoje,
+            ATTR_UPDATED: datetime.now(dt_util.DEFAULT_TIME_ZONE),
+            ATTR_VYCHOZI: source,
+            ATTR_CILOVA: destination,
+            ATTR_SPOJE: spoje,
         }
 
         validate_response(data)
 
         return data
 
-
     def _parse_connections(self, html: str) -> list:
+
+        if self.parser == 1:
+            return self._parse_connections_v1(html)
+
+        if self.parser == 2:
+            return self._parse_connections_v2(html)
+
+        raise ValueError(f"Unsupported parser version: {self.parser}")
+
+    def _parse_connections_v1(self, html: str) -> list:
+        """Parse connection-table based IDOS layout."""
 
         soup = BeautifulSoup(html, "html.parser")
 
@@ -121,7 +146,7 @@ class IdosScraper:
 
         result = []
 
-        now = datetime.now()
+        reference_dt  = datetime.now()
 
         for table in tables:
 
@@ -132,45 +157,47 @@ class IdosScraper:
 
             try:
 
-                row0 = rows[0].find_all("td")
-                row1 = rows[1].find_all("td")
+                row0 = rows[0].find_all("td", recursive=False)
+                row1 = rows[1].find_all("td", recursive=False)
 
                 date = row0[1].get_text(strip=True)
 
                 odjezd = row0[4].get_text(strip=True)
                 prijezd = row1[3].get_text(strip=True)
 
-                odjezd_dt = datetime.strptime(f"{date}{now.year} {odjezd}:00", "%d.%m.%Y %H:%M:%S")
-                prijezd_dt = datetime.strptime(f"{date}{now.year} {prijezd}:00", "%d.%m.%Y %H:%M:%S")
+                odjezd_dt = datetime.strptime(f"{date}{reference_dt.year} {odjezd}:00", "%d.%m.%Y %H:%M:%S")
+                prijezd_dt = datetime.strptime(f"{date}{reference_dt.year} {prijezd}:00", "%d.%m.%Y %H:%M:%S")
 
-                #
-                # Přelom roku
-                #
-                if odjezd_dt < now - timedelta(days=1):
-                    odjezd_dt = odjezd_dt.replace(year=odjezd_dt.year + 1)
+                odjezd_dt = self._normalize_schedule_datetime(odjezd_dt, reference_dt)
+                prijezd_dt = self._normalize_schedule_datetime(prijezd_dt, reference_dt)
 
-                if prijezd_dt < now - timedelta(days=1):
-                    prijezd_dt = prijezd_dt.replace(year=prijezd_dt.year + 1)
+                prijezd_dt = self._normalize_arrival_datetime(odjezd_dt, prijezd_dt)
+
 
                 from_stop = row0[2].get_text(strip=True)
                 to_stop = row1[2].get_text(strip=True)
 
-                line_a = row0[6].find("a")
+                cell = row0[6]
 
-                linka = (
-                    line_a.get_text(strip=True)
-                    if line_a
-                    else ""
-                )
+                line_a = cell.find("a")
+                linka = line_a.get_text(strip=True) if line_a else "-"
+
+                vehicle_img = cell.find("img")
+                if vehicle_img:
+                    prostredek = vehicle_img.get("title") or vehicle_img.get("alt") or ""
+                    prostredek = VEHICLE_TYPES.get(prostredek.lower(), prostredek)
+                else:
+                    prostredek = ""
 
                 result.append(
                     {
-                        "odjezd": odjezd,
-                        "odjezd_ts": int(odjezd_dt.timestamp()),
-                        "prijezd": prijezd,
-                        "prijezd_ts": int(prijezd_dt.timestamp()),
-                        "linka": linka,
-                        "spoj": f"{from_stop}->{to_stop}",
+                        ATTR_ODJEZD: odjezd,
+                        ATTR_ODJEZD_TS: int(odjezd_dt.timestamp()),
+                        ATTR_PRIJEZD: prijezd,
+                        ATTR_PRIJEZD_TS: int(prijezd_dt.timestamp()),
+                        ATTR_LINKA: linka,
+                        ATTR_PROSTREDEK: prostredek,
+                        ATTR_SPOJ: f"{from_stop}->{to_stop}",
                     }
                 )
 
@@ -178,3 +205,117 @@ class IdosScraper:
                 continue
 
         return result
+
+    def _parse_connections_v2(self, html: str) -> list:
+        """Parse connection-list based IDOS layout."""
+
+        soup = BeautifulSoup(html, "html.parser")
+
+        result = []
+
+        reference_dt = datetime.now()
+
+        for conn in soup.select("div.connection-list > div.connection"):
+
+            try:
+                #
+                # Linka
+                #
+                line_el = conn.select_one("div.line-title h3 span")
+
+                line_text = (
+                    line_el.get_text(strip=True)
+                    if line_el
+                    else ""
+                )
+
+                prostredek = ""
+                linka = "-"
+
+                if self.prostredek:
+                    linka = line_text
+                    prostredek = self.prostredek
+                else:
+                    parts = line_text.split(" ", 1)
+
+                    if len(parts) > 1:
+                        prostredek = parts[0]
+                        linka = parts[1]
+                    elif line_text:
+                        linka = line_text
+
+                #
+                # Odjezd / příjezd
+                #
+                stations = conn.select("ul.stations li.item")
+
+                if len(stations) < 2:
+                    continue
+
+                departure_station = stations[0]
+                arrival_station = stations[-1]
+
+                odjezd = departure_station.select_one("p.time").get_text(strip=True)
+
+                prijezd = arrival_station.select_one("p.time").get_text(strip=True)
+
+                #
+                # Datum
+                #
+                date_el = conn.select_one("div.connection-head h2.date span.date-after")
+
+                if not date_el:
+                    continue
+
+                #
+                # "1.11. ne" -> "1.11."
+                #
+                date = date_el.get_text(strip=True).split()[0]
+
+                odjezd_dt = datetime.strptime(f"{date}{reference_dt.year} {odjezd}:00", "%d.%m.%Y %H:%M:%S")
+                prijezd_dt = datetime.strptime(f"{date}{reference_dt.year} {prijezd}:00","%d.%m.%Y %H:%M:%S")
+
+                odjezd_dt = self._normalize_schedule_datetime(odjezd_dt, reference_dt)
+                prijezd_dt = self._normalize_schedule_datetime(prijezd_dt, reference_dt)
+
+                prijezd_dt = self._normalize_arrival_datetime(odjezd_dt, prijezd_dt)
+
+                from_stop = departure_station.select_one("strong.name").get_text(strip=True)
+                to_stop = arrival_station.select_one("strong.name").get_text(strip=True)
+
+                result.append(
+                    {
+                        ATTR_LINKA: linka,
+                        ATTR_PROSTREDEK: prostredek,
+                        ATTR_ODJEZD: odjezd,
+                        ATTR_ODJEZD_TS: int(odjezd_dt.timestamp()),
+                        ATTR_PRIJEZD: prijezd,
+                        ATTR_PRIJEZD_TS: int(prijezd_dt.timestamp()),
+                        ATTR_SPOJ: f"{from_stop}->{to_stop}",
+                    }
+                )
+
+            except Exception as exc:
+                _LOGGER.debug("Unable to parse connection: %s", exc)
+
+        return result
+
+    def _normalize_schedule_datetime(self, dt: datetime, reference: datetime) -> datetime:
+        """
+        Convert IDOS partial date to real date.
+
+        Handles year rollover.
+        """
+
+        if dt < reference - timedelta(days=1):
+            return dt.replace(year=dt.year + 1)
+
+        return dt
+
+    def _normalize_arrival_datetime(self, departure_dt: datetime, arrival_dt: datetime) -> datetime:
+        """Handle midnight rollover."""
+
+        if arrival_dt < departure_dt:
+            arrival_dt += timedelta(days=1)
+
+        return arrival_dt

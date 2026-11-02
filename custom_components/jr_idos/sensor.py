@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import time
+import math
 
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.components.sensor import (
@@ -23,6 +24,7 @@ from .const import (
     DEFAULT_CONNECTIONS,
     ATTR_CILOVA,
     ATTR_LINKA,
+    ATTR_PROSTREDEK,
     ATTR_LINKA_TEXT,
     ATTR_ODJEZD,
     ATTR_ODJEZD_TS,
@@ -35,6 +37,7 @@ from .const import (
     ATTR_UPDATED,
     ATTR_VYCHOZI,
     ICON_CONNECTION,
+    ICONS_CONNECTION,
     ICON_ROUTE,
     TEXTS,
 )
@@ -140,7 +143,6 @@ class JrRouteSensor(JrBaseEntity, SensorEntity):
 class JrConnectionSensor(JrBaseEntity, SensorEntity):
     """Single IDOS connection."""
 
-    _attr_icon = ICON_CONNECTION
     _attr_native_unit_of_measurement = "min"
     _attr_suggested_display_precision = 0
     _attr_state_class = None
@@ -208,7 +210,7 @@ class JrConnectionSensor(JrBaseEntity, SensorEntity):
         if departure_ts is None:
             return None
 
-        minutes = round(departure_ts - time.time()) / 60
+        minutes = math.ceil((departure_ts - time.time()) / 60)
 
         return max(minutes,0)
 
@@ -227,10 +229,20 @@ class JrConnectionSensor(JrBaseEntity, SensorEntity):
         return {
             ATTR_PORADI: self.index + 1,
             ATTR_LINKA: spoj.get(ATTR_LINKA),
-            ATTR_LINKA_TEXT: f"{self.texts['line']}: {spoj.get(ATTR_LINKA)}",
+            ATTR_PROSTREDEK: spoj.get(ATTR_PROSTREDEK),
+            ATTR_LINKA_TEXT: f"{spoj.get(ATTR_PROSTREDEK) or self.texts['line']} {spoj.get(ATTR_LINKA)}".strip(),
             ATTR_ODJEZD: spoj.get(ATTR_ODJEZD),
             ATTR_ODJEZD_TS: datetime.fromtimestamp(odjezd_ts, DEFAULT_TIME_ZONE).isoformat()  if odjezd_ts else None,
             ATTR_PRIJEZD: spoj.get(ATTR_PRIJEZD),
             ATTR_PRIJEZD_TS: datetime.fromtimestamp(prijezd_ts, DEFAULT_TIME_ZONE).isoformat() if prijezd_ts else None,
             ATTR_SPOJ: spoj.get(ATTR_SPOJ),
         }
+
+    @property
+    def icon(self) -> str:
+
+        spoj = self._connection()
+        if not spoj:
+            return ICON_CONNECTION
+
+        return ICONS_CONNECTION.get(spoj.get(ATTR_PROSTREDEK).lower(), ICON_CONNECTION)

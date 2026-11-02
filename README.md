@@ -23,10 +23,11 @@ Integrace je vhodná například pro sledování odjezdů z místa bydliště, p
 
 ## Podporované oblasti
 
-Aktuálně otestováno:
-
-- IDS JMK (Brno)
-- PID (Praha)
+- IDS Jihomoravského kraje
+- Pražská integrovaná doprava
+- IDS Moravskoslezského kraje
+- IDS Olomouckého kraje
+- Vlaky
 
 Další oblasti mohou být doplněny na vyžádání.
 

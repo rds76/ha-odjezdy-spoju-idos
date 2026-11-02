@@ -30,16 +30,42 @@ DEFAULT_OFFSET = 4
 CONF_REGION = "region"
 REGIONS = {
     "idsjmk": {
-        "name": "IDS JMK",
-        "url": "https://idsjmk.idos.cz/brno/spojeni",
+        "name": "IDS Jihomoravského kraje",
+        "url": "https://idsjmk.idos.cz/idsjmk/spojeni",
+    },
+    "idsjmk-v2": {
+        "name": "IDS Jihomoravského kraje (v2)",
+        "url": "https://idos.cz/idsjmk/spojeni/vysledky",
+        "parser": 2
     },
     "pid": {
-        "name": "PID",
+        "name": "Pražská integrovaná doprava",
         "url": "https://pid.idos.cz/spojeni",
     },
-
+    "pid-v2": {
+        "name": "Pražská integrovaná doprava (v2)",
+        "url": "https://idos.cz/pid/spojeni/vysledky",
+        "parser": 2
+    },
+    "odis-v2": {
+        "name": "IDS Moravskoslezského kraje",
+        "url": "https://idos.cz/odis/spojeni/vysledky",
+        "parser": 2
+    },
+    "odisidsok-v2": {
+        "name": "IDS Olomouckého kraje",
+        "url": "https://idos.cz/idsok/spojeni/vysledky",
+        "parser": 2
+    },
+    "vlaky-v2": {
+        "name": "Vlaky",
+        "url": "https://idos.cz/vlaky/spojeni/vysledky",
+        "parser": 2,
+        "prostredek": "Vlak",
+    },
 }
 
+# config-flow helper
 REGION_OPTIONS = [
     {
         "value": key,
@@ -60,6 +86,7 @@ ATTR_SPOJE = "spoje"
 
 ATTR_LINKA = "linka"
 ATTR_LINKA_TEXT = "linka_text"
+ATTR_PROSTREDEK  = "prostredek"
 
 ATTR_ODJEZD = "odjezd"
 ATTR_ODJEZD_TS = "odjezd_ts"
@@ -89,14 +116,26 @@ MINUTE_ROLLOVER_BUFFER_SECONDS = 10
 #
 ICON_ROUTE = "mdi:bus-clock"
 ICON_CONNECTION = "mdi:bus"
+ICONS_CONNECTION = {
+    "bus": "mdi:bus",
+    "vlak": "mdi:train",
+    "tram": "mdi:tram",
+    "metro": "mdi:subway",
+    "trol": "mdi:bus-electric",
+}
 #
 # Texty
 #
 TEXTS = {
     "cs": {
-        "line": "linka",
+        "line": "linka:",
     },
     "en": {
-        "line": "line",
+        "line": "line:",
     },
+}
+VEHICLE_TYPES = {
+    "autobus": "Bus",
+    "tramvaj": "Tram",
+    "trolejbus": "Trol",
 }

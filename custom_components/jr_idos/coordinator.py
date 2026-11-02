@@ -23,7 +23,7 @@ from homeassistant.helpers.update_coordinator import (
 from homeassistant.util import dt as dt_util
 
 from .idos import IdosScraper
-from .idos_data import first_departure_timestamp
+from .connection_data import first_departure_timestamp
 
 from .const import (
     CONF_DESTINATION,
