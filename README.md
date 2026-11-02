@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="custom_components/jr_idos/brand/icon.png" width="128" alt="JR-IDOS">
+</p>
+
 # Odjezdy spojů IDOS
 
 [![GitHub release](https://img.shields.io/github/v/release/rds76/ha-odjezdy-spoju-idos)](https://github.com/rds76/ha-odjezdy-spoju-idos/releases/latest)
