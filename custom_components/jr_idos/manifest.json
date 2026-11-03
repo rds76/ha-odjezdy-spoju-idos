@@ -1,12 +1,12 @@
 {
   "domain": "jr_idos",
   "name": "Odjezdy spojů IDOS",
-  "version": "1.1.1",
+  "categories": ["vehicles_transport.public_transport"],
+  "codeowners": ["@rds76"],
   "config_flow": true,
   "documentation": "https://github.com/rds76/ha-odjezdy-spoju-idos",
-  "issue_tracker": "https://github.com/rds76/ha-odjezdy-spoju-idos/issues",
   "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/rds76/ha-odjezdy-spoju-idos/issues",
   "requirements": ["beautifulsoup4>=4.12.0"],
-  "codeowners": ["@rds76"],
-  "categories": ["vehicles_transport.public_transport"]
+  "version": "1.1.1"
 }
