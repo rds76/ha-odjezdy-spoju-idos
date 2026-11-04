@@ -10,6 +10,9 @@
           "destination": "Cílová zastávka",
           "connections": "Maximální počet spojů",
           "offset": "Posun v minutách"
+        },
+        "data_description": {
+          "offset": "Kolik minut před odjezdem se spoj ještě považuje za aktuální (neboli čas na dojití na zastávku). Po této době se přejde na další spoj."
         }
       }
     }
@@ -20,6 +23,9 @@
         "title": "Spoje IDOS",
         "data": {
           "offset": "Posun v minutách"
+        },
+        "data_description": {
+          "offset": "Kolik minut před odjezdem se spoj ještě považuje za aktuální (neboli čas na dojití na zastávku). Po této době se přejde na další spoj."
         }
       }
     }

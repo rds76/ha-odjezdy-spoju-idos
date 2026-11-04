@@ -10,6 +10,9 @@
           "destination": "Destination stop",
           "connections": "Number of connections",
           "offset": "Offset in minutes"
+        },
+        "data_description": {
+          "offset": "How many minutes before departure a connection is still considered current (i.e. walking time to the stop). After that, the next connection is shown."
         }
       }
     }
@@ -20,6 +23,9 @@
         "title": "Spoje IDOS",
         "data": {
           "offset": "Offset in minutes"
+        },
+        "data_description": {
+          "offset": "How many minutes before departure a connection is still considered current (i.e. walking time to the stop). After that, the next connection is shown."
         }
       }
     }
