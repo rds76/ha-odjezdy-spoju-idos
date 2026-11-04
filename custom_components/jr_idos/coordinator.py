@@ -50,7 +50,7 @@ class JrIdosCoordinator(DataUpdateCoordinator):
 
         # self.api = JrIdosApi(session)
 
-        self.api = IdosScraper(session, entry.data.get(CONF_REGION, "idsjmk"))
+        self.api = IdosScraper(hass, session, entry.data.get(CONF_REGION, "idsjmk"))
 
 
         #

@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup
 
 from .connection_data import validate_response
 from homeassistant.util import dt as dt_util
+from homeassistant.core import HomeAssistant
 
 from .const import (
     DEFAULT_TIMEOUT,
@@ -33,7 +34,8 @@ class IdosScraper:
 
     MAX_REQUESTS = 5
 
-    def __init__(self, session, region_id):
+    def __init__(self, hass: HomeAssistant, session, region_id):
+        self.hass = hass
         self.session = session
         region = REGIONS[region_id]
         self.base_url = region["url"]
@@ -78,7 +80,7 @@ class IdosScraper:
                 html = await response.text()
                 _LOGGER.debug("URL: %s", response.url)
 
-            batch = self._parse_connections(html)
+            batch = await self.hass.async_add_executor_job(self._parse_connections, html)
 
             if not batch:
                 _LOGGER.warning("IDOS returned no connections, stopping pagination")
@@ -146,7 +148,7 @@ class IdosScraper:
 
         result = []
 
-        reference_dt  = datetime.now()
+        reference_dt = datetime.now(dt_util.DEFAULT_TIME_ZONE)
 
         for table in tables:
 
@@ -165,8 +167,8 @@ class IdosScraper:
                 odjezd = row0[4].get_text(strip=True)
                 prijezd = row1[3].get_text(strip=True)
 
-                odjezd_dt = datetime.strptime(f"{date}{reference_dt.year} {odjezd}:00", "%d.%m.%Y %H:%M:%S")
-                prijezd_dt = datetime.strptime(f"{date}{reference_dt.year} {prijezd}:00", "%d.%m.%Y %H:%M:%S")
+                odjezd_dt = datetime.strptime(f"{date}{reference_dt.year} {odjezd}:00", "%d.%m.%Y %H:%M:%S").replace(tzinfo=reference_dt.tzinfo)
+                prijezd_dt = datetime.strptime(f"{date}{reference_dt.year} {prijezd}:00", "%d.%m.%Y %H:%M:%S").replace(tzinfo=reference_dt.tzinfo)
 
                 odjezd_dt = self._normalize_schedule_datetime(odjezd_dt, reference_dt)
                 prijezd_dt = self._normalize_schedule_datetime(prijezd_dt, reference_dt)
@@ -213,7 +215,7 @@ class IdosScraper:
 
         result = []
 
-        reference_dt = datetime.now()
+        reference_dt = datetime.now(dt_util.DEFAULT_TIME_ZONE)
 
         for conn in soup.select("div.connection-list > div.connection"):
 
@@ -272,8 +274,8 @@ class IdosScraper:
                 #
                 date = date_el.get_text(strip=True).split()[0]
 
-                odjezd_dt = datetime.strptime(f"{date}{reference_dt.year} {odjezd}:00", "%d.%m.%Y %H:%M:%S")
-                prijezd_dt = datetime.strptime(f"{date}{reference_dt.year} {prijezd}:00","%d.%m.%Y %H:%M:%S")
+                odjezd_dt = datetime.strptime(f"{date}{reference_dt.year} {odjezd}:00", "%d.%m.%Y %H:%M:%S").replace(tzinfo=reference_dt.tzinfo)
+                prijezd_dt = datetime.strptime(f"{date}{reference_dt.year} {prijezd}:00","%d.%m.%Y %H:%M:%S").replace(tzinfo=reference_dt.tzinfo)
 
                 odjezd_dt = self._normalize_schedule_datetime(odjezd_dt, reference_dt)
                 prijezd_dt = self._normalize_schedule_datetime(prijezd_dt, reference_dt)
