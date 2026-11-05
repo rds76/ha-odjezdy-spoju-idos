@@ -203,8 +203,8 @@ class IdosScraper:
                     }
                 )
 
-            except Exception:
-                continue
+            except Exception as exc:
+                _LOGGER.debug("Unable to parse connection: %s", exc)
 
         return result
 
