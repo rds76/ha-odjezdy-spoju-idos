@@ -7,6 +7,7 @@
 [![GitHub release](https://img.shields.io/github/v/release/rds76/ha-odjezdy-spoju-idos)](https://github.com/rds76/ha-odjezdy-spoju-idos/releases/latest)
 [![GitHub License](https://img.shields.io/github/license/rds76/ha-odjezdy-spoju-idos)](LICENSE)
 ![GitHub Validate](https://img.shields.io/github/actions/workflow/status/rds76/ha-odjezdy-spoju-idos/validate.yaml?label=validate)
+[![HACS Custom](https://img.shields.io/badge/HACS-Custom-41BDF5?logo=homeassistant&logoColor=white)](https://my.home-assistant.io/redirect/hacs_repository/?owner=rds76&repository=ha-odjezdy-spoju-idos&category=integration)
 [![GitHub stars](https://img.shields.io/github/stars/rds76/ha-odjezdy-spoju-idos?style=social)](https://github.com/rds76/ha-odjezdy-spoju-idos/stargazers)
 
 Home Assistant integrace pro zobrazení nadcházejících odjezdů veřejné dopravy z portálu IDOS.
