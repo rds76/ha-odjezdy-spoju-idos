@@ -196,6 +196,8 @@ class JrIdosCoordinator(DataUpdateCoordinator):
     async def async_shutdown(self) -> None:
         """Cleanup."""
 
+        await super().async_shutdown()
+
         if self._unsub_refresh:
             self._unsub_refresh()
 
