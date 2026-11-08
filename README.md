@@ -12,7 +12,10 @@
 
 Home Assistant integrace pro zobrazení nadcházejících odjezdů veřejné dopravy z portálu IDOS.
 
-![Ukázka integrace](assets/spoje.png)
+<p align="center">
+  <img src="assets/odjezdy-spoju-light.png" width="48%" alt="Karta Odjezdy spojů IDOS – světlý režim">
+  <img src="assets/odjezdy-spoju-dark.png" width="48%" alt="Karta Odjezdy spojů IDOS – tmavý režim">
+</p>
 
 Integrace je vhodná například pro sledování odjezdů z místa bydliště, pracoviště, školy nebo jiné často používané zastávky. Automaticky zobrazuje nejbližší přímé spoje mezi dvěma zvolenými zastávkami a plánuje aktualizace podle skutečných časů odjezdů.
 
@@ -26,6 +29,7 @@ Integrace je vhodná například pro sledování odjezdů z místa bydliště, p
 - Automatická aktualizace před odjezdem nejbližšího spoje
 - Čeština a angličtina
 - Optimalizovaný počet dotazů na IDOS
+- Vlastní Lovelace karta s odpočtem do odjezdu (součástí integrace)
 
 ## Podporované oblasti
 
@@ -36,6 +40,10 @@ Integrace je vhodná například pro sledování odjezdů z místa bydliště, p
 - Vlaky
 
 Další oblasti mohou být doplněny na vyžádání.
+
+## Požadavky
+
+Home Assistant 2024.7.0 nebo novější.
 
 ## Instalace přes HACS
 
@@ -130,11 +138,39 @@ Každá entita spoje obsahuje například:
 - timestamp odjezdu
 - timestamp příjezdu
 
+Karta používá hlavní entitu, která nese atributy všech zobrazených spojů.
+
 ## Jak funguje aktualizace
 
 Integrace nepoužívá pevný interval obnovování.
 
 Po načtení spojů automaticky vypočítá nejvhodnější okamžik další aktualizace podle odjezdu nejbližšího spoje. Díky tomu výrazně snižuje počet požadavků vůči službě IDOS.
+
+## Lovelace karta
+
+Integrace obsahuje vlastní kartu `custom:jr-idos-card`. Registruje se automaticky, není potřeba přidávat žádný zdroj. Po první instalaci restartujte Home Assistant a obnovte stránku v prohlížeči (Ctrl+Shift+R).
+
+Kartu lze přidat přes editor dashboardu (**Přidat kartu → Odjezdy spojů IDOS**) nebo v YAML:
+
+```yaml
+type: custom:jr-idos-card
+entity: sensor.vystaviste
+color_strip: true
+```
+
+| Volba | Popis |
+|-------|-------|
+| `entity` | Hlavní entita trasy (např. `sensor.vystaviste`), ne entity jednotlivých spojů |
+| `color_strip` | Barevný pruh vlevo, podle kterého lze odlišit více tras. Výchozí `false` |
+
+### Zvýraznění spoje
+
+Karta zvýrazňuje první spoj podle času, který zbývá na vyražení, s ohledem na nastavený `offset` (čas na cestu k zastávce):
+
+- **oranžově**, pokud do odjezdu zbývá méně než 15 min + offset,
+- **červeně**, pokud zbývá méně než 8 min + offset.
+
+Pruh nad seznamem spojů ukazuje stejný časový úsek. Časy delší než hodina se zobrazují jako `1:29 h`.
 
 ## Známá omezení
 
