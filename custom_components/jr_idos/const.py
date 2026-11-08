@@ -104,6 +104,7 @@ ATTR_CILOVA = "cilova"
 ATTR_POCET_SPOJU = "pocet_spoju"
 
 ATTR_UPDATED = "updated"
+ATTR_OFFSET = "offset"
 
 #
 # Coordinator
@@ -139,3 +140,6 @@ VEHICLE_TYPES = {
     "tramvaj": "Tram",
     "trolejbus": "Trol",
 }
+
+CARD_FILE = "jr-idos-card.js"
+CARD_URL = f"/{DOMAIN}/{CARD_FILE}"

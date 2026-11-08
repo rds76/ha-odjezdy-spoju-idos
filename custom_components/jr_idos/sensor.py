@@ -21,7 +21,9 @@ from .const import (
     MANUFACTURER,
     MODEL,
     CONF_CONNECTIONS,
+    CONF_OFFSET,
     DEFAULT_CONNECTIONS,
+    DEFAULT_OFFSET,
     ATTR_CILOVA,
     ATTR_LINKA,
     ATTR_PROSTREDEK,
@@ -36,6 +38,7 @@ from .const import (
     ATTR_SPOJE,
     ATTR_UPDATED,
     ATTR_VYCHOZI,
+    ATTR_OFFSET,
     ICON_CONNECTION,
     ICONS_CONNECTION,
     ICON_ROUTE,
@@ -137,6 +140,9 @@ class JrRouteSensor(JrBaseEntity, SensorEntity):
             ATTR_CILOVA: data.get(ATTR_CILOVA),
             ATTR_POCET_SPOJU: len(data.get(ATTR_SPOJE,[])),
             ATTR_SPOJE: data.get(ATTR_SPOJE,[]),
+            ATTR_OFFSET: int(self.entry.options.get(CONF_OFFSET,self.entry.data.get(CONF_OFFSET, DEFAULT_OFFSET),
+    )
+),
         }
 
 

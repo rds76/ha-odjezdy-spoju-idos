@@ -1,0 +1,10 @@
+{
+  "line": "Linka",
+  "departure": "Odjezd",
+  "minutes": "{min} min",
+  "departure_in": "Odjezd za",
+  "no_connections": "Žádné spoje.",
+  "unavailable": "Entita není dostupná.",
+  "entity_label": "Hlavní entita trasy",
+  "color_strip": "Barevný pruh trasy"
+}

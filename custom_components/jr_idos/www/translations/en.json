@@ -1,0 +1,10 @@
+{
+  "line": "Line",
+  "departure": "Depart",
+  "minutes": "{min} min",
+  "departure_in": "Departs in",
+  "no_connections": "No connections.",
+  "unavailable": "Entity unavailable.",
+  "entity_label": "Main route entity",
+  "color_strip": "Route color strip"
+}
