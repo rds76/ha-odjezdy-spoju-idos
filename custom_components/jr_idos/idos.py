@@ -56,6 +56,7 @@ class IdosScraper:
         requests = 0
 
         previous_departure = 0
+        search_dt_min_ts = search_dt.replace(second=0, microsecond=0).timestamp()
 
         while len(spoje) < count and requests < self.MAX_REQUESTS:
 
@@ -87,12 +88,12 @@ class IdosScraper:
                 break
 
             #
-            # odstranění duplicit při navazujících dotazech
+            # remove duplicates from follow-up queries and connections before the searched time
             #
             existing = {spoj[ATTR_ODJEZD_TS] for spoj in spoje}
 
             for spoj in batch:
-                if spoj[ATTR_ODJEZD_TS] not in existing:
+                if spoj[ATTR_ODJEZD_TS] not in existing and spoj[ATTR_ODJEZD_TS] >= search_dt_min_ts:
                     spoje.append(spoj)
 
             if len(spoje) >= count:
@@ -107,7 +108,7 @@ class IdosScraper:
             previous_departure = last_departure
 
             #
-            # další hledání od minuty po posledním spoji
+            # next search starts one minute after the last connection
             #
             search_dt = datetime.fromtimestamp(last_departure, dt_util.DEFAULT_TIME_ZONE) + timedelta(minutes=1)
 
