@@ -110,7 +110,12 @@ ATTR_OFFSET = "offset"
 # Coordinator
 #
 FALLBACK_REFRESH_MINUTES = 5
-MINUTE_ROLLOVER_BUFFER_SECONDS = 10
+
+# Seconds before the offset boundary at which the scheduled refresh runs.
+#  Positive: refresh BEFORE the estimated time (the new connection is ready when the old one expires).
+#  Negative: refresh AFTER the estimated time (the old connection stays visible until the offset is reached).
+# Valid range: -59..59.
+MINUTE_ROLLOVER_BUFFER_SECONDS = -2
 
 #
 # Icons
