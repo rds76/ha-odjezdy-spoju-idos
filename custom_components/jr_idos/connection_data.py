@@ -41,7 +41,10 @@ def first_departure_timestamp(data: dict) -> int | None:
     return int(departure)
 
 def filter_from(spoje: list[dict], search_dt: datetime) -> list[dict]:
-    """Keep connections departing at or after the minute of search_dt."""
+    """
+    Keep connections departing at or after the minute of search_dt.
+    IDOS may also return earlier connections whose delay keeps them in the future.
+    """
 
     min_ts = search_dt.replace(second=0, microsecond=0).timestamp()
     return [s for s in spoje if s[ATTR_ODJEZD_TS] >= min_ts]
