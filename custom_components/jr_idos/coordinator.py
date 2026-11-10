@@ -23,7 +23,7 @@ from homeassistant.helpers.update_coordinator import (
 from homeassistant.util import dt as dt_util
 
 from .idos import IdosScraper
-from .connection_data import first_departure_timestamp
+from .connection_data import first_departure_timestamp, filter_from
 
 from .const import (
     CONF_DESTINATION,
@@ -33,6 +33,7 @@ from .const import (
     FALLBACK_REFRESH_MINUTES,
     CONF_REGION,
     MINUTE_ROLLOVER_BUFFER_SECONDS,
+    ATTR_SPOJE,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -102,9 +103,17 @@ class JrIdosCoordinator(DataUpdateCoordinator):
             return data
 
         except (ClientError, TimeoutError, ValueError) as err:
-            _LOGGER.warning("Unable to load IDOS data: %s", err)
-            self._schedule_next_refresh(None)
-            return self.data
+            _LOGGER.warning("[%s] Unable to load IDOS data: %s", self.entry.title, err)
+
+            if not self.data:
+                raise UpdateFailed(f"No connections available: {err}") from err
+
+            valid = filter_from(self.data[ATTR_SPOJE], search_dt)
+            data = {**self.data, ATTR_SPOJE: valid}
+
+            # None -> fallback refresh, otherwise plan from the first remaining connection
+            self._schedule_next_refresh(data if valid else None)
+            return data
 
     def _schedule_next_refresh(self, data) -> None:
         """

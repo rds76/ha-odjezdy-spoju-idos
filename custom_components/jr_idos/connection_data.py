@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
-from .const import (   
-    ATTR_ODJEZD_TS,  
+from datetime import datetime
+
+from .const import (
+    ATTR_ODJEZD_TS,
     ATTR_SPOJE,
     ATTR_UPDATED,
 )
@@ -37,3 +39,9 @@ def first_departure_timestamp(data: dict) -> int | None:
         return None
 
     return int(departure)
+
+def filter_from(spoje: list[dict], search_dt: datetime) -> list[dict]:
+    """Keep connections departing at or after the minute of search_dt."""
+
+    min_ts = search_dt.replace(second=0, microsecond=0).timestamp()
+    return [s for s in spoje if s[ATTR_ODJEZD_TS] >= min_ts]

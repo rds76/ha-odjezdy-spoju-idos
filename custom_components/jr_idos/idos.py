@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 import aiohttp
 from bs4 import BeautifulSoup
 
-from .connection_data import validate_response
+from .connection_data import validate_response, filter_from
 from homeassistant.util import dt as dt_util
 from homeassistant.core import HomeAssistant
 
@@ -56,7 +56,6 @@ class IdosScraper:
         requests = 0
 
         previous_departure = 0
-        search_dt_min_ts = search_dt.replace(second=0, microsecond=0).timestamp()
 
         while len(spoje) < count and requests < self.MAX_REQUESTS:
 
@@ -84,17 +83,13 @@ class IdosScraper:
             batch = await self.hass.async_add_executor_job(self._parse_connections, html)
 
             if not batch:
-                _LOGGER.warning("IDOS returned no connections, stopping pagination")
+                _LOGGER.debug("IDOS returned no connections (request %d/%d, since %s)", requests, self.MAX_REQUESTS, search_dt.strftime("%H:%M"))
                 break
 
             #
             # remove duplicates from follow-up queries and connections before the searched time
             #
-            existing = {spoj[ATTR_ODJEZD_TS] for spoj in spoje}
-
-            for spoj in batch:
-                if spoj[ATTR_ODJEZD_TS] not in existing and spoj[ATTR_ODJEZD_TS] >= search_dt_min_ts:
-                    spoje.append(spoj)
+            spoje.extend(filter_from(batch, search_dt))
 
             if len(spoje) >= count:
                 break

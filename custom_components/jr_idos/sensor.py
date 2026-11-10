@@ -97,6 +97,10 @@ class JrBaseEntity(CoordinatorEntity):
         lang = self.hass.config.language or "en"
         return TEXTS.get(lang, TEXTS["en"])
 
+    @property
+    def available(self) -> bool:
+        return super().available and self.coordinator.data is not None
+
 
 class JrRouteSensor(JrBaseEntity, SensorEntity):
     """Main route sensor."""
@@ -119,11 +123,6 @@ class JrRouteSensor(JrBaseEntity, SensorEntity):
             return None
 
         return self.coordinator.data.get(ATTR_UPDATED)
-
-
-    @property
-    def available(self):
-        return self.coordinator.data is not None
 
     @property
     def extra_state_attributes(self):
@@ -197,10 +196,7 @@ class JrConnectionSensor(JrBaseEntity, SensorEntity):
 
     @property
     def available(self):
-        return (
-            self._connection()
-            is not None
-        )
+        return super().available and self._connection() is not None
 
     @property
     def native_value(self):
