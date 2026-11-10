@@ -10,6 +10,7 @@ from homeassistant.components.sensor import (
     SensorDeviceClass,
     SensorEntity,
 )
+from homeassistant.helpers.device_registry import DeviceEntryType
 from datetime import datetime
 from homeassistant.util.dt import (
     DEFAULT_TIME_ZONE,
@@ -90,6 +91,7 @@ class JrBaseEntity(CoordinatorEntity):
             "name": f"{DEVICE_NAME_PREFIX} {self.entry.title}",
             "manufacturer": MANUFACTURER,
             "model": MODEL,
+            "entry_type": DeviceEntryType.SERVICE,
         }
 
     @property
