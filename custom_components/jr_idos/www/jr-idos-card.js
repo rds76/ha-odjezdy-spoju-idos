@@ -147,7 +147,8 @@ class OdjezdyCard extends HTMLElement {
     const root = this.shadowRoot;
 
     if (!st || st.state === "unavailable") {
-      root.innerHTML = `<ha-card><div class="empty">${tr(this._t, "unavailable")}</div></ha-card>${STYLE}`;
+      const name = st?.attributes?.friendly_name || this._config.entity;
+      root.innerHTML = `<ha-card><div class="empty"><b>${name}</b><br>${tr(this._t, "unavailable")}</div></ha-card>${STYLE}`;
       return;
     }
 
@@ -259,6 +260,7 @@ const STYLE = `<style>
   .bar div.red { background: var(--error-color, #db4437); }
 
   .empty { padding: 16px; color: var(--secondary-text-color); }
+  .empty b { color: var(--primary-text-color); }
   ha-card.striped { border-left: 8px solid var(--route-color); }
 </style>`;
 
