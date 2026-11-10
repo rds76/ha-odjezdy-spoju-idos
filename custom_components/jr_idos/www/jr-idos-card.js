@@ -1,4 +1,4 @@
-const CARD_VERSION = "1.0.1";
+const CARD_VERSION = "1.0.2";
 const BASE_URL = "/jr_idos";
 const T_CACHE = {};
 
@@ -165,7 +165,7 @@ class OdjezdyCard extends HTMLElement {
       const mins = minsTo(first.odjezd_ts, now);
       const remaining = mins - offset;
       const p = Math.min(100, Math.max(0, ((WARN_MIN - remaining) / WARN_MIN) * 100));
-      const cls = mins < ALERT_MIN + offset ? "red" : mins < WARN_MIN + offset ? "orange" : "";
+      const cls = mins < ALERT_MIN + offset ? "alert" : mins < WARN_MIN + offset ? "warn" : "";
       progress = `<div class="bar"><div class="${cls}" style="width:${p}%"></div></div>`;
     }
     const headIcon = first ? vehicleIcon(first.prostredek) : DEFAULT_ICON;
@@ -176,8 +176,8 @@ class OdjezdyCard extends HTMLElement {
 
         let cls = "";
         if (i === 0) {
-          if (mins < ALERT_MIN + offset) cls = "red";
-          else if (mins < WARN_MIN + offset) cls = "orange";
+          if (mins < ALERT_MIN + offset) cls = "alert";
+          else if (mins < WARN_MIN + offset) cls = "warn";
         }
 
         const text =
@@ -196,9 +196,10 @@ class OdjezdyCard extends HTMLElement {
       })
       .join("");
 
-    const strip = this._config.color_strip
-      ? `style="--route-color:hsl(${this._hue()},50%,65%)"`
-      : "";
+    const strip = this._config.color_strip ? `style="--route-color:hsl(${this._hue()},50%,65%)"` : "";
+
+    const leaveMin = Math.max(0, minsTo(first.odjezd_ts, now) - offset);
+    const leave = (leaveMin >= 0 && leaveMin < WARN_MIN) ? `><span>${tr(this._t, "leave_in")} ${leaveMin} min</span>` : "";
 
     root.innerHTML = `
       <ha-card class="${this._config.color_strip ? "striped" : ""}" ${strip}>
@@ -210,7 +211,7 @@ class OdjezdyCard extends HTMLElement {
         </div>
         <table>
           <tr class="cols">
-            <th></th><th></th>
+            <th colspan="2" class="leave"${leave}</th>
             <th class="time">${tr(this._t, "departure")}</th>
             <th class="eta">${tr(this._t, "departure_in")}</th>
           </tr>
@@ -233,10 +234,11 @@ const STYLE = `<style>
   tr > :first-child { padding-left: 16px; }
   tr > :last-child { padding-right: 16px; }
 
-  .cols th { padding-top: 0; padding-bottom: 4px; font-size: 0.8em; font-weight: 400;
-             color: var(--secondary-text-color); }
+  .cols th { padding-top: 0; padding-bottom: 4px; font-size: 0.8em; font-weight: 400; color: var(--secondary-text-color); }
   .cols th.time, .cols th.eta { text-align: right; }
   .cols th.eta { padding-right: 26px; }
+  .cols th.leave {text-align: right; white-space: nowrap; font-size: 12px; font-weight: 400; padding-right: 1em; color: var(--primary-text-color); }
+  .cols th.leave span { background: var(--secondary-background-color, #e0e0e0);  color: var(--primary-text-color); padding: 2px 6px; border-radius: 6px; }
 
   .row { border-top: 1px solid var(--divider-color); color: var(--primary-text-color); }
   .barrow td { padding: 0; }
@@ -251,13 +253,13 @@ const STYLE = `<style>
   .eta { text-align: right; font-weight: 500; }
 
   .pill { display: inline-block; padding: 2px 10px; border-radius: 6px; font-weight: 700; }
-  .pill.orange { background: var(--warning-color, #ff9800); color: #fff; }
-  .pill.red { background: var(--error-color, #db4437); color: #fff; }
+  .pill.warn { background: var(--warning-color, #ff9800); color: #fff; }
+  .pill.alert { background: var(--error-color, #db4437); color: #fff; }
 
   .bar { height: 4px; background: var(--divider-color); overflow: hidden; }
   .bar div { height: 100%; background: var(--primary-color); transition: width 1s linear; }
-  .bar div.orange { background: var(--warning-color, #ff9800); }
-  .bar div.red { background: var(--error-color, #db4437); }
+  .bar div.warn { background: var(--warning-color, #ff9800); }
+  .bar div.alert { background: var(--error-color, #db4437); }
 
   .empty { padding: 16px; color: var(--secondary-text-color); }
   .empty b { color: var(--primary-text-color); }
