@@ -86,15 +86,18 @@ class IdosScraper:
                 _LOGGER.debug("IDOS returned no connections (request %d/%d, since %s)", requests, self.MAX_REQUESTS, search_dt.strftime("%H:%M"))
                 break
 
-            #
+            if _LOGGER.isEnabledFor(logging.DEBUG):
+                _LOGGER.debug("Page %d: search %s, batch %s", requests, search_dt.strftime("%Y-%m-%d %H:%M"), [s[ATTR_ODJEZD] for s in batch])
+
             # remove duplicates from follow-up queries and connections before the searched time
-            #
             spoje.extend(filter_from(batch, search_dt))
 
             if len(spoje) >= count:
                 break
 
-            last_departure = batch[-1][ATTR_ODJEZD_TS]
+            # Delayed connections can keep an earlier scheduled time, so the batch is not guaranteed to be ordered.
+            # Use the latest departure, not the last one, otherwise the pagination guard could stop too early.
+            last_departure = max(s[ATTR_ODJEZD_TS] for s in batch)
 
             if last_departure <= previous_departure:
                 _LOGGER.warning("Departure timestamp did not advance, stopping pagination")
