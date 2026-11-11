@@ -7,7 +7,7 @@ const WARN_MIN = 15, ALERT_MIN = 8;
 const TYPE_COLOR = {
   bus: "#2e9e4f",
   vlak: "#2f6fd0",
-  tram: "#d2554d",
+  tram: "#37474f",
   trol: "#d4a017",
   metro: "#8e44ad",
 };
@@ -199,7 +199,7 @@ class OdjezdyCard extends HTMLElement {
     const strip = this._config.color_strip ? `style="--route-color:hsl(${this._hue()},50%,65%)"` : "";
 
     const leaveMin = Math.max(0, minsTo(first.odjezd_ts, now) - offset);
-    const leave = (leaveMin >= 0 && leaveMin < WARN_MIN) ? `><span>${tr(this._t, "leave_in")} ${leaveMin} min</span>` : "";
+    const leave = (leaveMin > 0 && leaveMin < WARN_MIN) ? `><span>${tr(this._t, "leave_in")} <span class="${leaveMin < ALERT_MIN ? "b" : ""}">${leaveMin} min</span></span>` : "";
 
     root.innerHTML = `
       <ha-card class="${this._config.color_strip ? "striped" : ""}" ${strip}>
@@ -238,7 +238,9 @@ const STYLE = `<style>
   .cols th.time, .cols th.eta { text-align: right; }
   .cols th.eta { padding-right: 26px; }
   .cols th.leave {text-align: right; white-space: nowrap; font-size: 12px; font-weight: 400; padding-right: 1em; color: var(--primary-text-color); }
-  .cols th.leave span { background: var(--secondary-background-color, #e0e0e0);  color: var(--primary-text-color); padding: 2px 6px; border-radius: 6px; }
+  .cols th.leave span { background: var(--secondary-background-color, #e0e0e0);  color: var(--primary-text-color); padding: 3px 6px; border-radius: 6px; }
+  .cols th.leave span > span { padding: 0; }
+  .cols th.leave span.b { font-weight: 600; }
 
   .row { border-top: 1px solid var(--divider-color); color: var(--primary-text-color); }
   .barrow td { padding: 0; }
