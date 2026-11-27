@@ -1,4 +1,4 @@
-const CARD_VERSION = "1.0.2";
+const CARD_VERSION = "1.0.3";
 const BASE_URL = "/jr_idos";
 const T_CACHE = {};
 
@@ -21,6 +21,8 @@ const DEFAULTS = {
   no_connections: "No connections.",
   unavailable: "Entity unavailable.",
   entity_label: "Main route entity",
+  color_strip: "Route color strip",
+  leave_in: "Leave in",
 };
 
 const TYPE_ICON = {
@@ -66,6 +68,9 @@ const vehicleIcon = (v) => {
   return TYPE_ICON[key] || DEFAULT_ICON;
 };
 
+const esc = (v) => String(v ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+
+
 class OdjezdyCard extends HTMLElement {
   static getConfigElement() {
     return document.createElement("jr-idos-card-editor");
@@ -89,7 +94,7 @@ class OdjezdyCard extends HTMLElement {
   }
 
   setConfig(config) {
-    if (!config || !config.entity) throw new Error("Chybí 'entity'.");
+    if (!config || !config.entity) throw new Error("Missing 'entity'.");
     this._config = { mode: "board", ...config };
     this._render();
   }
@@ -148,7 +153,7 @@ class OdjezdyCard extends HTMLElement {
 
     if (!st || st.state === "unavailable") {
       const name = st?.attributes?.friendly_name || this._config.entity;
-      root.innerHTML = `<ha-card><div class="empty"><b>${name}</b><br>${tr(this._t, "unavailable")}</div></ha-card>${STYLE}`;
+      root.innerHTML = `<ha-card><div class="empty"><b>${esc(name)}</b><br>${tr(this._t, "unavailable")}</div></ha-card>${STYLE}`;
       return;
     }
 
@@ -160,6 +165,7 @@ class OdjezdyCard extends HTMLElement {
 
     // pruh se plní od (WARN_MIN + offset) do (offset) minut před odjezdem
     let progress = "";
+    let leave = "";
     const first = spoje[0];
     if (first) {
       const mins = minsTo(first.odjezd_ts, now);
@@ -167,6 +173,8 @@ class OdjezdyCard extends HTMLElement {
       const p = Math.min(100, Math.max(0, ((WARN_MIN - remaining) / WARN_MIN) * 100));
       const cls = mins < ALERT_MIN + offset ? "alert" : mins < WARN_MIN + offset ? "warn" : "";
       progress = `<div class="bar"><div class="${cls}" style="width:${p}%"></div></div>`;
+      if (remaining > 0 && remaining < WARN_MIN)
+        leave = `<span>${tr(this._t, "leave_in")} <span class="${remaining < ALERT_MIN ? "b" : ""}">${remaining} min</span></span>`;
     }
     const headIcon = first ? vehicleIcon(first.prostredek) : DEFAULT_ICON;
 
@@ -188,9 +196,9 @@ class OdjezdyCard extends HTMLElement {
 
         return `
           <tr class="row">
-            <td class="vehicle">${s.prostredek || ""}</td>
-            <td class="line"><span class="badge" title="${s.linka || ""}" style="background:${this._color(i, n, s.prostredek)}">${s.linka || ""}</span></td>
-            <td class="time">${s.odjezd}</td>
+            <td class="vehicle">${esc(s.prostredek)}</td>
+            <td class="line"><span class="badge" title="${esc(s.linka)}" style="background:${this._color(i, n, s.prostredek)}">${esc(s.linka)}</span></td>
+            <td class="time">${esc(s.odjezd)}</td>
             <td class="eta">${eta}</td>
           </tr>`;
       })
@@ -198,20 +206,17 @@ class OdjezdyCard extends HTMLElement {
 
     const strip = this._config.color_strip ? `style="--route-color:hsl(${this._hue()},50%,65%)"` : "";
 
-    const leaveMin = Math.max(0, minsTo(first.odjezd_ts, now) - offset);
-    const leave = (leaveMin > 0 && leaveMin < WARN_MIN) ? `><span>${tr(this._t, "leave_in")} <span class="${leaveMin < ALERT_MIN ? "b" : ""}">${leaveMin} min</span></span>` : "";
-
     root.innerHTML = `
       <ha-card class="${this._config.color_strip ? "striped" : ""}" ${strip}>
         <div class="head">
           <div class="title">
             <ha-icon class="vi" icon="${headIcon}"></ha-icon>
-            <span class="ttext">${a.vychozi || ""} → ${a.cilova || ""}</span>
+            <span class="ttext">${esc(a.vychozi)} → ${esc(a.cilova)}</span>
           </div>
         </div>
         <table>
           <tr class="cols">
-            <th colspan="2" class="leave"${leave}</th>
+            <th colspan="2" class="leave">${leave}</th>
             <th class="time">${tr(this._t, "departure")}</th>
             <th class="eta">${tr(this._t, "departure_in")}</th>
           </tr>
@@ -269,6 +274,8 @@ const STYLE = `<style>
 </style>`;
 
 class OdjezdyCardEditor extends HTMLElement {
+  _label = (schema) =>  tr(this._t, schema.name === "color_strip" ? "color_strip" : "entity_label");
+
   setConfig(config) {
     this._config = config;
     this._render();
@@ -280,7 +287,7 @@ class OdjezdyCardEditor extends HTMLElement {
       this._t = {};
       loadTexts(userLang(hass)).then((t) => {
         this._t = t;
-        if (this._form) this._form.computeLabel = () => tr(this._t, "entity_label");
+        if (this._form) this._form.computeLabel = this._label;
         this._render();
       });
     }
@@ -301,7 +308,7 @@ class OdjezdyCardEditor extends HTMLElement {
         },
         { name: "color_strip", selector: { boolean: {} } },
       ];
-      this._form.computeLabel = (schema) => tr(this._t, schema.name === "color_strip" ? "color_strip" : "entity_label");
+      this._form.computeLabel = this._label;
       this._form.addEventListener("value-changed", (e) =>
         this.dispatchEvent(
           new CustomEvent("config-changed", {
