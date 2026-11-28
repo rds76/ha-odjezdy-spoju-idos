@@ -7,7 +7,7 @@
 [![GitHub release](https://img.shields.io/github/v/release/rds76/ha-odjezdy-spoju-idos)](https://github.com/rds76/ha-odjezdy-spoju-idos/releases/latest)
 [![GitHub License](https://img.shields.io/github/license/rds76/ha-odjezdy-spoju-idos)](LICENSE)
 ![GitHub Validate](https://img.shields.io/github/actions/workflow/status/rds76/ha-odjezdy-spoju-idos/validate.yaml?label=validate)
-[![HACS Custom](https://img.shields.io/badge/HACS-Custom-41BDF5?logo=homeassistant&logoColor=white)](https://my.home-assistant.io/redirect/hacs_repository/?owner=rds76&repository=ha-odjezdy-spoju-idos&category=integration)
+[![Marketplace / HACS](https://img.shields.io/badge/Marketplace-HACS-41BDF5?logo=homeassistant&logoColor=white)](https://my.home-assistant.io/redirect/hacs_repository/?owner=rds76&repository=ha-odjezdy-spoju-idos&category=integration)
 [![GitHub stars](https://img.shields.io/github/stars/rds76/ha-odjezdy-spoju-idos?style=social)](https://github.com/rds76/ha-odjezdy-spoju-idos/stargazers)
 
 Home Assistant integrace pro zobrazení nadcházejících odjezdů veřejné dopravy z portálu IDOS.
@@ -45,15 +45,23 @@ Další oblasti mohou být doplněny na vyžádání.
 
 Home Assistant 2024.7.0 nebo novější.
 
-## Instalace přes HACS
+## Instalace
 
-1. Otevřete **HACS → Integrations**.
-2. Přidejte tento repozitář jako **Custom Repository** typu **Integration**.
-3. Nainstalujte integraci.
-4. Restartujte Home Assistant.
-5. Přidejte integraci přes **Nastavení → Zařízení a služby → Přidat integraci**.
+### Marketplace (Home Assistant 2026.11 a novější)
 
-## Ruční instalace
+1. Otevřete **Nastavení → Marketplace**.
+2. Vyhledejte **Odjezdy spojů IDOS** a zvolte **Install**.
+3. Dokončete nastavení, které se otevře automaticky.
+
+[![Otevřít v Home Assistantu](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=rds76&repository=ha-odjezdy-spoju-idos&category=integration)
+
+### HACS (Home Assistant 2026.10 a starší)
+
+1. Otevřete **HACS**, vyhledejte **Odjezdy spojů IDOS** a zvolte **Stáhnout**.
+2. Restartujte Home Assistant.
+3. Přidejte integraci přes **Nastavení → Zařízení a služby → Přidat integraci**.
+
+### Ruční instalace
 
 Zkopírujte adresář:
 
@@ -148,7 +156,7 @@ Po načtení spojů automaticky vypočítá nejvhodnější okamžik další akt
 
 ## Lovelace karta
 
-Integrace obsahuje vlastní kartu `custom:jr-idos-card`. Registruje se automaticky, není potřeba přidávat žádný zdroj. Po první instalaci restartujte Home Assistant a obnovte stránku v prohlížeči (Ctrl+Shift+R).
+Integrace obsahuje vlastní kartu `custom:jr-idos-card`. Registruje se automaticky, není potřeba přidávat žádný zdroj. Po přidání integrace obnovte stránku v prohlížeči (Ctrl+Shift+R), aby se karta načetla.
 
 Kartu lze přidat přes editor dashboardu (**Přidat kartu → Odjezdy spojů IDOS**) nebo v YAML:
 
